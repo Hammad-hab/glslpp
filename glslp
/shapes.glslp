@@ -1,0 +1,29 @@
+struct ShapeCanvas{
+    vec2 tUv;
+    vec2 position;
+    vec3 canvasBgColor;
+    vec2 _resolution;
+};
+
+void ShapeCanvas::new(inout ShapeCanvas self, vec2 uv, vec2 resolution)
+{
+    self.tUv=uv;
+    self._resolution = resolution;
+}
+
+
+vec3 ShapeCanvas::makeSquare(inout ShapeCanvas self,float dimension,vec3 color){
+    float diff = (self._resolution.x - self._resolution.y)/self._resolution.y; // Relative difference between the width and height
+    float x_min=self.position.x;
+    float x_max=dimension+self.position.x;
+    float y_min=self.position.y;
+    float y_max=dimension+self.position.y+(diff*dimension);
+  
+    if(
+        self.tUv.x>=x_min&&self.tUv.x<=x_max&& self.tUv.y>=y_min&& self.tUv.y<=y_max
+    ){
+        return color;
+    }else{
+        return self.canvasBgColor;
+    }
+}

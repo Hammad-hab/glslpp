@@ -1,9 +1,0 @@
-use chromatic_aberration.glsl
-
-void main() {
-    ChromaticAbberation instance;
-    instance.setUv(uv);
-    instance.setShift(0.01);
-    vec3 chromaticA = instance.getChromaticAbberation(texture);
-    gl_FragColor = vec4(chromaticA, 1.0);
-}

@@ -9,6 +9,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "bun": "^1.1.39",
     "chokidar": "^4.0.1"
   }
 }

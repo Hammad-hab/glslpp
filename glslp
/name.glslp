@@ -1,0 +1,14 @@
+use shapes.glslp
+
+
+varying vec2 vUv;
+uniform vec2 uResolution
+void main()
+{
+    ShapeCanvas canvas;
+    canvas.new(vUv, uResolution);
+    canvas.position=vec2(0.2, 0.2);
+    canvas.canvasBgColor = vec3(0.3686, 0.3922, 1.0);
+    vec3 rect = canvas.makeSquare(canvas, 0.1, vec3(0.0));
+    gl_FragColor=vec4(rect,1.);
+}

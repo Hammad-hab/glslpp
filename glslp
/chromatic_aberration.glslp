@@ -1,0 +1,38 @@
+#define SHIFT_X 10
+#define SHIFT_Y 01
+#define SHIFT_XY 11
+
+#define MIDDLE_MAN_REDUCTION 0.5
+
+struct ChromaticAbberation {
+    float shift;
+    vec3 lastChromaticTransformation;
+    int shiftMode;
+    vec2 tUv;
+};
+
+void ChromaticAbberation::new(inout ChromaticAbberation self, int shiftMode, vec2 uv) {
+     self.shiftMode = shiftMode;
+     self.tUv = uv;
+}
+
+vec3 ChromaticAbberation::getChromaticAbberation(inout ChromaticAbberation self, sampler2D txt) {
+    vec2 uvDisplacement = vec2(0.0, 0.0);
+    if (self.shiftMode == SHIFT_X) uvDisplacement.x = self.shift;
+    if (self.shiftMode == SHIFT_Y) uvDisplacement.y = self.shift;
+    if (self.shiftMode == SHIFT_XY) uvDisplacement = vec2(self.shift);
+    vec4 textureShift0 = texture(txt, self.tUv);
+    vec4 textureShift1 = texture(txt, self.tUv + uvDisplacement * MIDDLE_MAN_REDUCTION);
+    vec4 textureShift2 = texture(txt, self.tUv + uvDisplacement);
+    vec3 abberation = vec3(textureShift0.r, textureShift1.g, textureShift2.b);
+    self.lastChromaticTransformation =  abberation;
+    return abberation;
+}
+
+void ChromaticAbberation::setShift(inout ChromaticAbberation self, float shift) {
+     self.shift = shift;
+}
+
+void ChromaticAbberation::setUv(inout ChromaticAbberation self, vec2 uv) {
+    self.tUv = uv;
+}

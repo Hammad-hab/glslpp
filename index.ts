@@ -1,11 +1,12 @@
+#!/Users/hammad/.bun/bin/bun
 import chokidar from 'chokidar';
 import fs from 'fs/promises'
 import { _resolveFileModule } from './module_resolver';
-
+import { $ } from 'bun';
 
 
 const instance_def_tracker = new Map<string, string>()
-
+const command = process.argv[2] 
 const generate = async (content:string): Promise<string> => {
   const splited = content.split("\n")
   for (let i = 0; i < splited.length;) {
@@ -54,11 +55,13 @@ const generate = async (content:string): Promise<string> => {
   console.log('[SUCCESS]: GENERATION COMPLETE')
   return splited.join('\n')
 }
-
-chokidar.watch('.').on('change', async (path) => {
-  if (!path.endsWith('.glslp')) return
-  const contents = await fs.readFile(path, 'utf-8')
-  const gen_glsl = await generate(contents)
-  instance_def_tracker.clear()
-  await fs.writeFile(path.split('.')[0] + '.glsl', gen_glsl)
-})
+if (command === 'watch') {
+  const file = process.argv[3]
+  chokidar.watch(file).on('change', async (path) => {
+    if (!path.endsWith('.glslp')) return
+    const contents = await fs.readFile(path, 'utf-8')
+    const gen_glsl = await generate(contents)
+    instance_def_tracker.clear()
+    await fs.writeFile(path.split('.')[0] + '.glsl', gen_glsl)
+  })
+}
