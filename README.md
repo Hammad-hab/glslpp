@@ -4,7 +4,7 @@
 GLSL++ is an extended preprocessor designed to enhance code reusability, modularity, and maintainability while maintaining compatibility with standard GLSL compilers.
 
 ## Features
-- **Module Imports**: Supports `use` statements for modular code.
+- **Module Imports**: Supports `import` statements for modular code.
 - **Instance Method Transformation**: Converts `Struct::method()` syntax into function calls.
 - **Syntactic Sugar for Method Calls**: Rewrites `object.method(args)` to `Struct_method(object, args)`.
 - **Automatic File Watching**: Watches `.glslp` files and generates `.glsl` files on changes.
@@ -35,7 +35,7 @@ bun run glslpp watch shader.glslp
 ## Example
 #### Input Shader (`shader.glslp`)
 ```cpp
-use "common.glsl"
+import "common.glsl"
 
 #define SHIFT_X 10
 #define SHIFT_Y 01
@@ -119,7 +119,7 @@ void ChromaticAbberation_setUv(inout ChromaticAbberation self, vec2 uv) {
 ```
 
 ## How It Works
-### `use "file.glsl"`
+### `import "file.glsl"`
 Includes the content of another GLSL file before preprocessing.
 
 ### `Struct::method()` Syntax

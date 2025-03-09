@@ -1,67 +1,26 @@
 #!/Users/hammad/.bun/bin/bun
 import chokidar from 'chokidar';
 import fs from 'fs/promises'
-import { _resolveFileModule } from './module_resolver';
-import { $ } from 'bun';
+import {generate, instance_def_tracker} from './generate'
 
 
-const instance_def_tracker = new Map<string, string>()
 const command = process.argv[2] 
-const generate = async (content:string): Promise<string> => {
-  const splited = content.split("\n")
-  for (let i = 0; i < splited.length;) {
-    const split = splited[i]
-    if (split.startsWith('use ')) {
-       const position = splited.indexOf(split)
-       const constituents = split.split(' ')
-       const file_name = constituents[constituents.length - 1]
-       // TODO: add module resolver
-       console.log('[LOG]: Transpiling module imports...')
-       const file_contents = await _resolveFileModule(file_name)
-       splited[position] = await generate(file_contents) // set them to a NULL string
-       continue
-    }
 
-    if (split.includes("::")) {
-      // Found an instance method
-      const position = splited.indexOf(split)
-      const [struct, fn] = split.split(' ')[1].split('::')
-      const fn_name = fn.split('(')[0].trim()
-      instance_def_tracker.set(fn_name, struct)
-      splited[position] = split.replaceAll('::', '_')
-      i++
-      console.log(`[DEF]: Defined instance method ${fn_name}`)
-      continue
-    }
-
-    if (split.match(/\w+\.[\w_]+\(([^)]*)\)/)?.length)
-    {
-      const position = splited.indexOf(split)
-      const arr = split.split('.')
-      const object = arr[0].includes('=') ? arr[0].split("=")[1].trim() : arr[0].trim();
-      const fn = arr[1].split('(')[0]
-      const struct_name = instance_def_tracker.get(fn.trim())
-      if (!struct_name) {
-        throw `[ERROR]: Reference to undefined method ${fn}`
-      }
-      splited[position] = split.replace(`${object}.${fn}(`,`${struct_name}_${fn}(${object.trim()},`)
-      console.log(`[COMP]: Successfully parsed syntactic sugar for method calls, ${object}.${fn}`)
-
-      i++
-      continue
-    }
-   i++
-  }
-  console.log('[SUCCESS]: GENERATION COMPLETE')
-  return splited.join('\n')
-}
 if (command === 'watch') {
   const file = process.argv[3]
+  console.log('Watching file for changes...')
   chokidar.watch(file).on('change', async (path) => {
-    if (!path.endsWith('.glslp')) return
+    if (!path.endsWith('.glslp')) return // Checking if the input file is a .glslp file
     const contents = await fs.readFile(path, 'utf-8')
-    const gen_glsl = await generate(contents)
+    const generated_glsl = await generate(contents)
+    const filenameComponents = path.split('.')
+
+    const file = filenameComponents[0]
+    // Clearing all the tracked definations
     instance_def_tracker.clear()
-    await fs.writeFile(path.split('.')[0] + '.glsl', gen_glsl)
+    await fs.writeFile(file + '.glsl', generated_glsl)
   })
+} else {
+  console.log(`Unknown command ${command}\n`)
+  console.log(`glslp [command]\n\twatch: Watch a .glslp file for changes and transpile it accordingly`)
 }
